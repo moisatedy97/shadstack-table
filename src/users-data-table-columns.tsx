@@ -23,6 +23,7 @@ export const usersDataColumns: ColumnDef<User>[] = [
     accessorKey: "last_name",
     header: "Last Name",
     enableResizing: true,
+    enableSorting: false,
     minSize: 320,
     filterFn: "equalsString",
   },

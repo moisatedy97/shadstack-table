@@ -39,13 +39,13 @@ function TableHeadFiltering<TData, TValue>({ header }: { header: Header<TData, T
     return (
       <Popover>
         <PopoverTrigger asChild={true}>
-          <Button variant={"ghost"} className="group mx-1 h-full px-2 hover:bg-secondary/10">
+          <Button variant={"ghost"} className="group absolute right-1 top-1 size-6 px-1 hover:bg-secondary/10">
             <>
               <Filter
-                className={`size-4 cursor-pointer ${header.column.getIsFiltered() ? "text-primary group-hover:text-primary/70" : "text-secondary/40"}`}
+                className={`size-4 ${header.column.getIsFiltered() ? "text-primary group-hover:text-primary/70" : "text-secondary/40"}`}
               />
               {header.column.getIsFiltered() && (
-                <span className="bg-primary group-hover:bg-primary/70 absolute right-3 top-1 h-2 w-2 rounded-full" />
+                <span className="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-primary group-hover:bg-primary/70" />
               )}
             </>
           </Button>
@@ -68,7 +68,7 @@ export default TableHeadFiltering;
 
 const SelectColumnFilter = <TData, TValue>({
   filterRef,
-  header
+  header,
 }: {
   filterRef: RefObject<{ value: string; updateRef: (operator: string) => void }>;
   header: Header<TData, TValue>;
@@ -81,9 +81,9 @@ const SelectColumnFilter = <TData, TValue>({
       ...filterRef.current!,
       updateRef(operator: string) {
         filterRef.current!.value = operator;
-      }
+      },
     }),
-    []
+    [],
   );
 
   const handleValueChange = (operator: string) => {

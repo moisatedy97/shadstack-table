@@ -1,16 +1,18 @@
-import { CSSProperties, useMemo } from "react";
-import { horizontalListSortingStrategy, SortableContext, useSortable } from "@dnd-kit/sortable";
+import { SortableContext, horizontalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Header, Table } from "@tanstack/react-table";
-import { Grab } from "lucide-react";
+import { CSSProperties, useMemo } from "react";
 
 import { Separator } from "../separator";
 import { TableHead, TableHeader, TableRow } from "../table";
 
 import DataTableFiltering from "./data-table-filtering";
 import DataTableSorting from "./data-table-sorting";
+import DataTableResizing from "./data-table-resizing";
 
 function DataTableHeader<TData>({ table }: { table: Table<TData> }) {
+  console.log("TableHeader");
+
   return (
     <TableHeader className="sticky top-0 z-10 grid bg-white shadow-md">
       {table.getHeaderGroups().map((headerGroup) => (
@@ -30,22 +32,9 @@ export default DataTableHeader;
 
 const DataTableHead = <TData, TValue>({ table, header }: { table: Table<TData>; header: Header<TData, TValue> }) => {
   const { attributes, isDragging, listeners, setNodeRef, transform } = useSortable({
-    id: header.column.id
+    id: header.column.id,
   });
   const isPinned = header.column.getIsPinned();
-  const isResizing = header.column.getIsResizing();
-
-  let separatorColor = "";
-
-  if (header.column.getCanResize()) {
-    if (isResizing) {
-      separatorColor = "bg-primary cursor-col-resize";
-    } else {
-      separatorColor = "bg-primary/50";
-    }
-  } else {
-    separatorColor = "bg-secondary/40 cursor-not-allowed";
-  }
 
   const style: CSSProperties = {
     transform: CSS.Translate.toString(transform),
@@ -58,33 +47,26 @@ const DataTableHead = <TData, TValue>({ table, header }: { table: Table<TData>; 
     // opacity: isDragging || isPinned ? 0.8 : 1,
     zIndex: isDragging || isPinned ? 20 : 0,
     left: isPinned === "left" ? `${header.column.getStart("left")}px` : undefined,
-    right: isPinned === "right" ? `${header.column.getAfter("right")}px` : undefined
+    right: isPinned === "right" ? `${header.column.getAfter("right")}px` : undefined,
   };
 
   const sortingState = table.getState().sorting;
   const headerFilteringState = table.getState().columnFilters.find((filter) => filter.id === header.column.id);
   const tableHeadSorting = useMemo(
-    () => <DataTableSorting header={header} isDragging={isDragging} />,
-    [sortingState, isDragging, header]
+    () => <DataTableSorting header={header} attributes={attributes} listeners={listeners} />,
+    [sortingState, isDragging, header, attributes, listeners],
   );
   const tableHeadFiltering = useMemo(() => <DataTableFiltering header={header} />, [headerFilteringState]);
 
   return (
-    <TableHead colSpan={header.colSpan} ref={setNodeRef} style={style} className="my-1 flex gap-1">
-      {tableHeadSorting}
-      {tableHeadFiltering}
-      <Separator
-        onMouseDown={header.getResizeHandler()}
-        onTouchStart={header.getResizeHandler()}
-        className={`h-full w-0.5 cursor-col-resize touch-none select-none ${separatorColor}`}
-      />
-      <div className="absolute -bottom-3 flex w-full items-center justify-center">
-        <Grab
-          {...attributes}
-          {...listeners}
-          className="h-4 cursor-grabbing touch-none select-none fill-white outline-none"
-        />
+    <TableHead colSpan={header.colSpan} ref={setNodeRef} style={style} className="flex w-full">
+      <div
+        className={`relative my-0.5 ml-0.5 mr-1 flex-1 cursor-grabbing rounded-md px-1 py-1.5 hover:bg-primary/10 ${isDragging ? "cursor-grab" : ""}`}
+      >
+        {tableHeadSorting}
+        {tableHeadFiltering}
       </div>
+      <DataTableResizing header={header} />
     </TableHead>
   );
 };

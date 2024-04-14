@@ -105,6 +105,7 @@ function DataTableComponent<TData, TValue>({ columns, data, isLoading, onRowClic
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
+
     if (active && over && active.id !== over.id) {
       setColumnOrder((columnOrder) => {
         const oldIndex = columnOrder.indexOf(active.id as string);
