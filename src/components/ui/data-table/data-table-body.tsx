@@ -16,14 +16,12 @@ function DataTableBody<TData>({
   table: Table<TData>;
   rowVirtualizer: Virtualizer<HTMLDivElement, Element>;
   isLoading: boolean;
-  onRowClick?: (row: Row<TData>) => void;
+  onRowClick: (row: Row<TData>) => void;
 }) {
   const { rows } = table.getRowModel();
 
   const handleRowClick = (row: Row<TData>) => () => {
-    if (onRowClick) {
-      onRowClick(row);
-    }
+    onRowClick(row);
   };
 
   if (isLoading) {
@@ -47,7 +45,7 @@ function DataTableBody<TData>({
         return (
           <TableRow
             key={row.id}
-            className="absolute flex w-full"
+            className="absolute flex w-full dark:text-white"
             data-index={virtualRow.index}
             ref={(node) => rowVirtualizer.measureElement(node)}
             style={{ transform: `translateY(${virtualRow.start}px)` }}
@@ -85,7 +83,6 @@ const DragAlongCell = <TData, TValue>({ cell }: { cell: Cell<TData, TValue> }) =
     transform: CSS.Translate.toString(transform),
     transition: "width transform 0.2s ease-in-out",
     width: cell.column.getSize(),
-    backgroundColor: isDragging ? "rgb(3 105 161 / 0.4)" : "",
 
     position: isPinned ? "sticky" : "relative",
     // opacity: isDragging || isPinned ? 0.8 : 1,
@@ -100,7 +97,7 @@ const DragAlongCell = <TData, TValue>({ cell }: { cell: Cell<TData, TValue> }) =
   };
 
   return (
-    <TableCell style={style} ref={setNodeRef} className="flex">
+    <TableCell style={style} ref={setNodeRef} className={`flex ${isDragging ? "bg-primary/50" : ""}`}>
       {flexRender(cell.column.columnDef.cell, cell.getContext())}
     </TableCell>
   );

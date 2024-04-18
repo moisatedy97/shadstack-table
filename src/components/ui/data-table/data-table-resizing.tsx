@@ -1,4 +1,5 @@
 import { Header } from "@tanstack/react-table";
+
 import { Separator } from "../separator";
 
 function DataTableResizing<TData, TValue>({ header }: { header: Header<TData, TValue> }): React.JSX.Element {

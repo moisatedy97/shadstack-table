@@ -3,24 +3,32 @@ import {
   ColumnOrderState,
   ColumnPinningState,
   ColumnSizingState,
-  InitialTableState,
+  FilterFn,
+  functionalUpdate,
+  makeStateUpdater,
   OnChangeFn,
   RowData,
   SortingState,
   Table,
   TableFeature,
   Updater,
-  VisibilityState,
-  functionalUpdate,
-  makeStateUpdater
+  VisibilityState
 } from "@tanstack/react-table";
 
+import { dataTableNumberFilters, dataTableStringFilters } from "../defaults/data-table-models";
+
+/**
+ * Interfaccia per gli stati locali della tabella dei dati.
+ */
 export interface I_DataTableLocalStates {
   columnVisibility: VisibilityState;
   pinningState: ColumnPinningState;
   columnOrder: ColumnOrderState;
 }
 
+/**
+ * Interfaccia per gli stati di sessione della tabella dei dati.
+ */
 export interface I_DataTableSessionStates {
   columnSorting: SortingState;
   columnFilters: ColumnFiltersState;
@@ -29,36 +37,84 @@ export interface I_DataTableSessionStates {
   globalFilter: string | undefined;
 }
 
-export type FiltersFnsState = {
-  id: string;
-  filterFn: string;
-};
+/**
+ * Tipo che rappresenta un'unione letterale.
+ * @template T - Tipo specifico.
+ * @template U - Tipo base, di default è una stringa.
+ */
+type LiteralUnion<T extends U, U = string> = T | (U & Record<never, never>);
 
-export type ColumnFiltersFnsState = FiltersFnsState[];
+/**
+ * Tipo per le opzioni di filtro.
+ */
+export type FilterOption = LiteralUnion<
+  string & keyof typeof dataTableNumberFilters & keyof typeof dataTableStringFilters
+>;
 
+/**
+ * Stato per le funzioni di filtro delle colonne.
+ */
+export type ColumnFiltersFnsState = Record<string, FilterOption>;
+
+/**
+ * Stato della tabella per le funzioni di filtro delle colonne.
+ */
 export interface ColumnFiltersFnsTableState {
   columnFiltersFns: ColumnFiltersFnsState;
 }
 
+/**
+ * Opzioni per le funzioni di filtro delle colonne.
+ */
 export interface ColumnFiltersFnsOptions {
   enableColumnFiltersFns?: boolean;
-  onColumnFiltersFnsChange?: OnChangeFn<ColumnFiltersFnsState>;
+  onColumnFiltersFnsChange?: OnChangeFn<Record<string, FilterOption>>;
 }
 
+/**
+ * Interfaccia per l'istanza delle funzioni di filtro delle colonne.
+ */
 export interface ColumnFiltersFnsInstance {
   setColumnFiltersFns: (updater: Updater<ColumnFiltersFnsState>) => void;
 }
 
+/**
+ * Estensioni del modulo "@tanstack/react-table" per supportare le funzioni di filtro delle colonne.
+ */
 declare module "@tanstack/react-table" {
+  // eslint-disable-next-line
   interface TableState extends ColumnFiltersFnsTableState {}
+  // eslint-disable-next-line
   interface TableOptionsResolved<TData extends RowData> extends ColumnFiltersFnsOptions {}
+  //eslint-disable-next-line
   interface Table<TData extends RowData> extends ColumnFiltersFnsInstance {}
+
+  /**
+   * Funzioni di filtro disponibili.
+   */
+  interface FilterFns {
+    equalsNumber: FilterFn<RowData>;
+    notEqualsNumber: FilterFn<RowData>;
+    greaterThan: FilterFn<RowData>;
+    greaterThanOrEqual: FilterFn<RowData>;
+    lessThan: FilterFn<RowData>;
+    lessThanOrEqual: FilterFn<RowData>;
+    notEqualsString: FilterFn<RowData>;
+    notEqualsStringSensitive: FilterFn<RowData>;
+    startsWith: FilterFn<RowData>;
+    startsWithSensitive: FilterFn<RowData>;
+    endsWith: FilterFn<RowData>;
+    endsWithSensitive: FilterFn<RowData>;
+  }
 }
 
+/**
+ * Caratteristica per le funzioni di filtro delle colonne.
+ */
 export const FiltersFnsFeature: TableFeature<unknown> = {
-  getInitialState: (state: InitialTableState | undefined): ColumnFiltersFnsTableState => {
+  getInitialState: (state): ColumnFiltersFnsTableState => {
     return {
-      columnFiltersFns: [],
+      columnFiltersFns: {},
       ...state
     };
   },
@@ -71,7 +127,8 @@ export const FiltersFnsFeature: TableFeature<unknown> = {
   createTable: <TData extends RowData>(table: Table<TData>): void => {
     table.setColumnFiltersFns = (updater) => {
       const safeUpdater: Updater<ColumnFiltersFnsState> = (old) => {
-        let newState = functionalUpdate(updater, old);
+        const newState = functionalUpdate(updater, old);
+
         return newState;
       };
       return table.options.onColumnFiltersFnsChange?.(safeUpdater);

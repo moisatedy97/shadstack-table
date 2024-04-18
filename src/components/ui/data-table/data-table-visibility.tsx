@@ -1,7 +1,12 @@
 import { Column, Table } from "@tanstack/react-table";
 import { Eye, EyeOff } from "lucide-react";
 
-import { ContextMenuIconItem, ContextMenuLabel, ContextMenuSeparator, ContextMenuSubContent } from "../context-menu";
+import {
+  DropdownMenuIconItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuSubContent
+} from "../dropdown-menu";
 
 function DataTableVisibility<TData>({ table }: { table: Table<TData> }) {
   const handleHide = (column: Column<TData>) => () => {
@@ -9,9 +14,9 @@ function DataTableVisibility<TData>({ table }: { table: Table<TData> }) {
   };
 
   return (
-    <ContextMenuSubContent className="w-48">
-      <ContextMenuLabel>Column Visibility</ContextMenuLabel>
-      <ContextMenuSeparator />
+    <DropdownMenuSubContent className="w-60">
+      <DropdownMenuLabel>Column Visibility</DropdownMenuLabel>
+      <DropdownMenuSeparator />
       {table
         .getAllColumns()
         .filter((column) => typeof column.accessorFn !== "undefined")
@@ -19,7 +24,7 @@ function DataTableVisibility<TData>({ table }: { table: Table<TData> }) {
           const icon = column.getCanHide() ? column.getIsVisible() ? <Eye /> : <EyeOff /> : undefined;
 
           return (
-            <ContextMenuIconItem
+            <DropdownMenuIconItem
               key={column.id}
               icon={icon}
               disabled={!column.getCanHide()}
@@ -28,16 +33,16 @@ function DataTableVisibility<TData>({ table }: { table: Table<TData> }) {
               onClick={handleHide(column)}
             >
               {column.id}
-            </ContextMenuIconItem>
+            </DropdownMenuIconItem>
           );
         })}
       {Object.keys(table.getState().columnVisibility).length > 0 && (
         <>
-          <ContextMenuSeparator />
-          <ContextMenuIconItem onClick={() => table.resetColumnVisibility()}>Reset Visibility</ContextMenuIconItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuIconItem onClick={() => table.resetColumnVisibility()}>Reset Visibility</DropdownMenuIconItem>
         </>
       )}
-    </ContextMenuSubContent>
+    </DropdownMenuSubContent>
   );
 }
 

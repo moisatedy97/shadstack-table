@@ -1,22 +1,21 @@
-import { SortableContext, horizontalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
+import { CSSProperties, useMemo } from "react";
+import { horizontalListSortingStrategy, SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Header, Table } from "@tanstack/react-table";
-import { CSSProperties, useMemo } from "react";
 
-import { Separator } from "../separator";
 import { TableHead, TableHeader, TableRow } from "../table";
 
 import DataTableFiltering from "./data-table-filtering";
-import DataTableSorting from "./data-table-sorting";
+import DataTableHeaderContextMenu from "./data-table-header-context-menu";
+import DataTableOrdering from "./data-table-ordering";
 import DataTableResizing from "./data-table-resizing";
+import DataTableSorting from "./data-table-sorting";
 
 function DataTableHeader<TData>({ table }: { table: Table<TData> }) {
-  console.log("TableHeader");
-
   return (
-    <TableHeader className="sticky top-0 z-10 grid bg-white shadow-md">
+    <TableHeader className="sticky top-0 z-10 grid border-b border-secondary/20 bg-white shadow-md dark:bg-black">
       {table.getHeaderGroups().map((headerGroup) => (
-        <TableRow key={headerGroup.id} className="flex">
+        <TableRow key={headerGroup.id} className="flex border-none">
           <SortableContext items={table.getState().columnOrder} strategy={horizontalListSortingStrategy}>
             {headerGroup.headers.map((header) => (
               <DataTableHead key={header.id} table={table} header={header} />
@@ -34,6 +33,9 @@ const DataTableHead = <TData, TValue>({ table, header }: { table: Table<TData>; 
   const { attributes, isDragging, listeners, setNodeRef, transform } = useSortable({
     id: header.column.id,
   });
+  const headerFilteringState = table.getState().columnFilters.find((filter) => filter.id === header.column.id);
+  const headerFilteringFnsState = table.getState().columnFiltersFns[header.column.id];
+  const sortingState = table.getState().sorting;
   const isPinned = header.column.getIsPinned();
 
   const style: CSSProperties = {
@@ -41,7 +43,6 @@ const DataTableHead = <TData, TValue>({ table, header }: { table: Table<TData>; 
     transition: "width transform 0.2s ease-in-out",
     whiteSpace: "nowrap",
     width: header.column.getSize(),
-    backgroundColor: isDragging ? "rgb(3 105 161 / 0.4)" : "",
 
     position: isPinned ? "sticky" : "relative",
     // opacity: isDragging || isPinned ? 0.8 : 1,
@@ -50,23 +51,33 @@ const DataTableHead = <TData, TValue>({ table, header }: { table: Table<TData>; 
     right: isPinned === "right" ? `${header.column.getAfter("right")}px` : undefined,
   };
 
-  const sortingState = table.getState().sorting;
-  const headerFilteringState = table.getState().columnFilters.find((filter) => filter.id === header.column.id);
-  const tableHeadSorting = useMemo(
-    () => <DataTableSorting header={header} attributes={attributes} listeners={listeners} />,
-    [sortingState, isDragging, header, attributes, listeners],
-  );
-  const tableHeadFiltering = useMemo(() => <DataTableFiltering header={header} />, [headerFilteringState]);
+  const tableHeadOrdering = useMemo(() => {
+    return <DataTableOrdering attributes={attributes} listeners={listeners} />;
+  }, [isDragging]);
+
+  const tableHeadSorting = useMemo(() => {
+    return <DataTableSorting header={header} />;
+  }, [sortingState]);
+
+  const tableHeadFiltering = useMemo(() => {
+    return <DataTableFiltering header={header} />;
+  }, [headerFilteringState, headerFilteringFnsState, table.getPreFilteredRowModel().flatRows]);
 
   return (
-    <TableHead colSpan={header.colSpan} ref={setNodeRef} style={style} className="flex w-full">
-      <div
-        className={`relative my-0.5 ml-0.5 mr-1 flex-1 cursor-grabbing rounded-md px-1 py-1.5 hover:bg-primary/10 ${isDragging ? "cursor-grab" : ""}`}
+    <DataTableHeaderContextMenu header={header}>
+      <TableHead
+        colSpan={header.colSpan}
+        ref={setNodeRef}
+        style={style}
+        className={`flex w-full ${isDragging ? "bg-primary/50" : ""}`}
       >
-        {tableHeadSorting}
-        {tableHeadFiltering}
-      </div>
-      <DataTableResizing header={header} />
-    </TableHead>
+        <div className={`ml-0.5 mr-1 flex flex-1 gap-1 py-1`}>
+          {tableHeadOrdering}
+          {tableHeadSorting}
+          {tableHeadFiltering}
+        </div>
+        <DataTableResizing header={header} />
+      </TableHead>
+    </DataTableHeaderContextMenu>
   );
 };

@@ -1,8 +1,10 @@
-import React, { RefObject, useImperativeHandle, useMemo, useRef, useState } from "react";
+import React from "react";
 import { FilterFnOption, Header } from "@tanstack/react-table";
-import { Filter, X } from "lucide-react";
+import { Filter } from "lucide-react";
 
 import useDebounceFn from "@/hooks/useDebounceFn";
+import { dataTableNumberFilters, dataTableStringFilters } from "@/lib/defaults/data-table-models";
+import { FilterOption } from "@/lib/interfaces/data-table-states";
 
 import { Button } from "../button";
 import { Input } from "../input";
@@ -10,20 +12,36 @@ import { Popover, PopoverContent, PopoverTrigger } from "../popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../select";
 
 function TableHeadFiltering<TData, TValue>({ header }: { header: Header<TData, TValue> }): React.JSX.Element {
-  const filterRef = useRef<{ value: string; updateRef: (operator: string) => void }>(null);
-  const [value, setValue] = useState<string>((header.column.getFilterValue() as string) ?? "");
+  const filterValue = header.column.getFilterValue() as string;
+  const filterOperator = header.getContext().table.getState().columnFiltersFns[header.column.id];
+  const [value, setValue] = React.useState<string>(filterValue ?? "");
+
+  const firstValue = React.useMemo(() => {
+    return header.getContext().table.getPreFilteredRowModel().flatRows[0]?.getValue(header.column.id);
+  }, [header.getContext().table.getPreFilteredRowModel().flatRows]);
 
   const handleDataTableStateChange = useDebounceFn(() => {
-    if (value.length > 0) {
-      header.column.setFilterValue(value);
+    if (typeof firstValue === "number") {
+      if (value === "") {
+        header.column.setFilterValue(undefined);
+      } else {
+        header.column.setFilterValue(Number(value));
+      }
     } else {
-      header.column.setFilterValue(undefined);
+      header.column.setFilterValue(value);
     }
   }, 500);
 
-  const handleChangeFilter = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setValue(e.target.value);
-    handleDataTableStateChange();
+  const handleChangeFilter = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (typeof firstValue === "number") {
+      if (!isNaN(Number(event.target.value))) {
+        setValue(event.target.value);
+        handleDataTableStateChange();
+      }
+    } else {
+      setValue(event.target.value);
+      handleDataTableStateChange();
+    }
   };
 
   const handleClearFilter = () => {
@@ -31,95 +49,79 @@ function TableHeadFiltering<TData, TValue>({ header }: { header: Header<TData, T
     handleDataTableStateChange();
   };
 
-  const selectColumnFilter = useMemo(() => {
-    return <SelectColumnFilter filterRef={filterRef} header={header} />;
-  }, []);
+  const selectColumnFilter = React.useMemo(() => {
+    return <SelectColumnFilter header={header} firstValue={firstValue} filterOperator={filterOperator} />;
+  }, [firstValue]);
 
-  if (header.column.getCanFilter()) {
-    return (
-      <Popover>
-        <PopoverTrigger asChild={true}>
-          <Button variant={"ghost"} className="group absolute right-1 top-1 size-6 px-1 hover:bg-secondary/10">
-            <>
-              <Filter
-                className={`size-4 ${header.column.getIsFiltered() ? "text-primary group-hover:text-primary/70" : "text-secondary/40"}`}
-              />
-              {header.column.getIsFiltered() && (
-                <span className="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-primary group-hover:bg-primary/70" />
-              )}
-            </>
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="flex w-96 items-center gap-2" side="top">
-          {selectColumnFilter}
-          <Input type="text" placeholder="Filter" value={value} onChange={handleChangeFilter} />
-          <Button variant="destructive" disabled={value.length === 0} className="w-10 p-2" onClick={handleClearFilter}>
-            <X />
-          </Button>
-        </PopoverContent>
-      </Popover>
-    );
-  } else {
-    return <React.Fragment />;
-  }
+  return (
+    <Popover>
+      <PopoverTrigger asChild={true}>
+        <Button
+          variant={"ghost"}
+          disabled={!header.column.getCanFilter()}
+          className="relative size-7 px-1 hover:bg-secondary/10"
+        >
+          <>
+            <Filter
+              className={`${header.column.getIsFiltered() ? "text-primary group-hover:text-primary/70" : "text-secondary/40"}`}
+            />
+            {header.column.getIsFiltered() && (
+              <span className="absolute right-0 top-0.5 h-1.5 w-1.5 rounded-full bg-primary group-hover:bg-primary/70" />
+            )}
+          </>
+        </Button>
+      </PopoverTrigger>
+
+      <PopoverContent className="flex w-72 flex-col items-center gap-2">
+        {filterOperator?.length === 0 ? <React.Fragment /> : selectColumnFilter}
+        <Input placeholder="Filter" disabled={!filterOperator} value={value} onChange={handleChangeFilter} />
+        <Button
+          variant="destructive"
+          disabled={!filterOperator || value === undefined}
+          className="self-end"
+          onClick={handleClearFilter}
+        >
+          Reset
+        </Button>
+      </PopoverContent>
+    </Popover>
+  );
 }
 
 export default TableHeadFiltering;
 
 const SelectColumnFilter = <TData, TValue>({
-  filterRef,
   header,
+  firstValue,
+  filterOperator,
 }: {
-  filterRef: RefObject<{ value: string; updateRef: (operator: string) => void }>;
   header: Header<TData, TValue>;
+  firstValue: TValue;
+  filterOperator: FilterOption;
 }) => {
-  const selectRef = useRef<HTMLDivElement>(null);
-
-  useImperativeHandle(
-    filterRef,
-    () => ({
-      ...filterRef.current!,
-      updateRef(operator: string) {
-        filterRef.current!.value = operator;
-      },
-    }),
-    [],
-  );
+  const dataTableFilters = typeof firstValue === "number" ? dataTableNumberFilters : dataTableStringFilters;
 
   const handleValueChange = (operator: string) => {
-    filterRef.current?.updateRef(operator);
-
     header.column.columnDef.filterFn = operator as FilterFnOption<TData>;
-    header.getContext().table.setColumnFiltersFns((old) => {
-      const aa = old.map((entry) => (entry.id === header.column.id ? { ...entry, filterFn: operator } : entry));
-      if (!aa.find((entry) => entry.id === header.column.id)) {
-        aa.push({ id: header.column.id, filterFn: operator });
-      }
-      console.log(aa);
+    header.column.setFilterValue(header.column.getFilterValue() as string);
 
-      return aa;
+    header.getContext().table.setColumnFiltersFns((old) => {
+      return { ...old, [header.column.id]: operator };
     });
   };
 
   return (
-    <div className="min-w-24">
-      <Select onValueChange={handleValueChange} defaultValue={header.column.getFilterFn()?.name}>
+    <div className="w-full">
+      <Select onValueChange={handleValueChange} defaultValue={filterOperator}>
         <SelectTrigger>
-          <SelectValue />
+          <SelectValue placeholder="Select a filter" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem ref={selectRef} value={"auto"}>
-            {"auto"}
-          </SelectItem>
-          <SelectItem ref={selectRef} value={"equals"}>
-            {"equals"}
-          </SelectItem>
-          <SelectItem ref={selectRef} value={"equalsString"}>
-            {"equalsString"}
-          </SelectItem>
-          <SelectItem ref={selectRef} value={"includesString"}>
-            {"includesString"}
-          </SelectItem>
+          {Object.keys(dataTableFilters).map((key, index) => (
+            <SelectItem key={`${index}_${key}`} value={key}>
+              {key}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
     </div>
