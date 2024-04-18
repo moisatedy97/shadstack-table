@@ -11,11 +11,11 @@ function Navbar(): React.JSX.Element {
       <div>
         <p className="text-sm text-secondary">
           {`Beautiful data table built with `}
-          <a href="https://github.com/shadstack/shadstack-table" className="font-bold italic hover:text-primary">
+          <a href="https://ui.shadcn.com/" className="font-bold italic hover:text-primary">
             Shadcn
           </a>
           {` and `}
-          <a href="https://github.com/Tanstack/table" className="font-bold italic hover:text-primary">
+          <a href="https://tanstack.com/table/" className="font-bold italic hover:text-primary">
             Tanstack Table v8.
           </a>
         </p>
