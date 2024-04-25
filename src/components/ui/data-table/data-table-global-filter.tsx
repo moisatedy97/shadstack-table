@@ -35,7 +35,7 @@ function DataTableGlobalFilter<TData>({ table }: { table: Table<TData> }): React
 
   return (
     <div>
-      <Input onChange={handleValueChange} placeholder="Filtro globale" className="h-8 w-60" />
+      <Input onChange={handleValueChange} placeholder="Global Filter" className="h-8 w-60" />
     </div>
   );
 }

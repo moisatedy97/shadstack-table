@@ -14,9 +14,12 @@ import { cn } from "@/lib/utils";
 
 function DataTableHeader<TData>({ table }: { table: Table<TData> }) {
   return (
-    <TableHeader className="sticky top-0 z-10 grid border-b border-secondary/20 bg-white shadow-md dark:bg-black">
+    <TableHeader className="sticky top-0 z-10 grid border-b bg-white shadow-md dark:border-gray-800 dark:bg-black">
       {table.getHeaderGroups().map((headerGroup) => (
-        <TableRow key={headerGroup.id} className="flex border-none bg-white dark:bg-black">
+        <TableRow
+          key={headerGroup.id}
+          className="flex border-none bg-white hover:bg-white dark:bg-black dark:hover:bg-black"
+        >
           <SortableContext items={table.getState().columnOrder} strategy={horizontalListSortingStrategy}>
             {headerGroup.headers.map((header) => (
               <DataTableHead key={header.id} table={table} header={header} />
@@ -52,7 +55,7 @@ const DataTableHead = <TData, TValue>({ table, header }: { table: Table<TData>; 
     right: isPinned === "right" ? `${header.column.getAfter("right")}px` : undefined,
   };
 
-  const classNames = cn("flex ", isDragging ? "bg-primary/50" : "bg-inherit");
+  const classNames = cn("flex", isDragging ? "bg-primary/50" : "bg-inherit");
 
   const tableHeadOrdering = useMemo(() => {
     return <DataTableOrdering attributes={attributes} listeners={listeners} />;

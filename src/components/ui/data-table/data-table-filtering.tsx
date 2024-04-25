@@ -59,7 +59,7 @@ function TableHeadFiltering<TData, TValue>({ header }: { header: Header<TData, T
         <Button
           variant={"ghost"}
           disabled={!header.column.getCanFilter()}
-          className="relative size-7 px-1 hover:bg-secondary/10"
+          className="dark:hover:bg-primary/30` relative size-7 px-1 hover:bg-primary/10"
         >
           <>
             <Filter

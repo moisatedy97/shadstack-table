@@ -6,7 +6,7 @@ import DataTableSettings from "./data-table-settings";
 
 function DataTableFooter<TData>({ table }: { table: Table<TData> }) {
   return (
-    <div className="flex h-10 items-center justify-between rounded-b-md border border-t-0 border-secondary/20 px-6">
+    <div className="flex h-10 items-center justify-between rounded-b-md border border-t-0 px-6 dark:border-gray-800">
       <div className="flex items-center gap-6">
         <DataTableSettings table={table} />
         <DataTableFooterStateInfo table={table} />

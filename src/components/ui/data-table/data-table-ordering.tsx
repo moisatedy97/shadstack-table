@@ -7,13 +7,18 @@ import { Button } from "../button";
 
 function DataTableOrdering({
   attributes,
-  listeners
+  listeners,
 }: {
   attributes: DraggableAttributes;
   listeners: SyntheticListenerMap | undefined;
 }): React.JSX.Element {
   return (
-    <Button {...attributes} {...listeners} variant={"ghost"} className="size-7 cursor-grab px-1 hover:bg-secondary/10">
+    <Button
+      {...attributes}
+      {...listeners}
+      variant={"ghost"}
+      className="size-7 cursor-grab px-1 hover:bg-primary/10 dark:hover:bg-primary/30"
+    >
       <GripVertical className="text-secondary/40" />
     </Button>
   );

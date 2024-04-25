@@ -36,7 +36,7 @@ function DataTableSorting<TData, TValue>({ header }: { header: Header<TData, TVa
   return (
     <div
       onClick={header.column.getToggleSortingHandler()}
-      className={`group flex flex-1 cursor-pointer items-center justify-center gap-1 rounded-md hover:bg-primary/10`}
+      className={`group flex flex-1 cursor-pointer items-center justify-center gap-1 rounded-md hover:bg-primary/10 dark:hover:bg-primary/30`}
     >
       <span className="select-none text-primary group-hover:text-primary/70">{headerTitle}</span>
       {header.column.getCanSort() && sortingElement}

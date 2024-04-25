@@ -173,7 +173,7 @@ function DataTableComponent<TData, TValue>({ columns, data, isLoading, onRowClic
         >
           <div
             ref={tableContainerRef}
-            className="relative h-80 overflow-auto rounded-t-md border border-secondary/20 dark:[color-scheme:dark]"
+            className="relative h-80 overflow-auto rounded-t-md border dark:border-gray-800 dark:[color-scheme:dark]"
           >
             <Table className="grid">
               {dataTableHeader}
