@@ -1,6 +1,6 @@
 import React from "react";
 import { Table } from "@tanstack/react-table";
-import { ArrowDownAZ, ArrowLeftRight, Eye, Filter, FilterX, ListOrdered, Settings } from "lucide-react";
+import { ArrowDownAZ, ArrowLeftRight, Eye, Filter, FilterX, ListOrdered, Pin, PinOff, Settings } from "lucide-react";
 
 import { Button } from "../button";
 import {
@@ -11,10 +11,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubTrigger,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from "../dropdown-menu";
 
 import DataTableVisibility from "./data-table-visibility";
+import DataTablePinning from "./data-table-pinning";
 
 function DataTableSettings<TData>({ table }: { table: Table<TData> }): React.JSX.Element {
   return (
@@ -35,6 +36,13 @@ function DataTableSettings<TData>({ table }: { table: Table<TData> }): React.JSX
               Column Visibility
             </DropdownMenuSubTrigger>
             <DataTableVisibility table={table} />
+          </DropdownMenuSub>
+
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger icon={<Pin />} inset={true}>
+              Column Pinning
+            </DropdownMenuSubTrigger>
+            <DataTablePinning table={table} />
           </DropdownMenuSub>
 
           <DropdownMenuSeparator />
@@ -71,6 +79,12 @@ const ResetActions = <TData,>({ table }: { table: Table<TData> }) => {
       {table.getState().columnFilters.length > 0 && (
         <DropdownMenuIconItem icon={<Filter />} onClick={() => table.resetColumnFilters()}>
           Reset Filters
+        </DropdownMenuIconItem>
+      )}
+
+      {table.getAllColumns().some((column) => column.getIsPinned()) && (
+        <DropdownMenuIconItem icon={<PinOff />} onClick={() => table.resetColumnPinning()}>
+          Reset Pinning
         </DropdownMenuIconItem>
       )}
 

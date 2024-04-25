@@ -10,12 +10,13 @@ import DataTableHeaderContextMenu from "./data-table-header-context-menu";
 import DataTableOrdering from "./data-table-ordering";
 import DataTableResizing from "./data-table-resizing";
 import DataTableSorting from "./data-table-sorting";
+import { cn } from "@/lib/utils";
 
 function DataTableHeader<TData>({ table }: { table: Table<TData> }) {
   return (
     <TableHeader className="sticky top-0 z-10 grid border-b border-secondary/20 bg-white shadow-md dark:bg-black">
       {table.getHeaderGroups().map((headerGroup) => (
-        <TableRow key={headerGroup.id} className="flex border-none">
+        <TableRow key={headerGroup.id} className="flex border-none bg-white dark:bg-black">
           <SortableContext items={table.getState().columnOrder} strategy={horizontalListSortingStrategy}>
             {headerGroup.headers.map((header) => (
               <DataTableHead key={header.id} table={table} header={header} />
@@ -51,6 +52,8 @@ const DataTableHead = <TData, TValue>({ table, header }: { table: Table<TData>; 
     right: isPinned === "right" ? `${header.column.getAfter("right")}px` : undefined,
   };
 
+  const classNames = cn("flex ", isDragging ? "bg-primary/50" : "bg-inherit");
+
   const tableHeadOrdering = useMemo(() => {
     return <DataTableOrdering attributes={attributes} listeners={listeners} />;
   }, [isDragging]);
@@ -65,12 +68,7 @@ const DataTableHead = <TData, TValue>({ table, header }: { table: Table<TData>; 
 
   return (
     <DataTableHeaderContextMenu header={header}>
-      <TableHead
-        colSpan={header.colSpan}
-        ref={setNodeRef}
-        style={style}
-        className={`flex w-full ${isDragging ? "bg-primary/50" : ""}`}
-      >
+      <TableHead colSpan={header.colSpan} ref={setNodeRef} style={style} className={classNames}>
         <div className={`ml-0.5 mr-1 flex flex-1 gap-1 py-1`}>
           {tableHeadOrdering}
           {tableHeadSorting}

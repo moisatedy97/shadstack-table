@@ -9,7 +9,7 @@ function Navbar(): React.JSX.Element {
         <ModeToggle />
       </div>
       <div>
-        <p className="text-sm text-secondary">
+        <p className="text-sm text-black dark:text-white">
           {`Beautiful data table built with `}
           <a href="https://ui.shadcn.com/" className="font-bold italic hover:text-primary">
             Shadcn
@@ -19,14 +19,14 @@ function Navbar(): React.JSX.Element {
             Tanstack Table v8.
           </a>
         </p>
-        <p className="text-sm text-secondary">
+        <p className="text-sm text-black dark:text-white">
           This data table was build with the purpose to be fast, lightweight and easy to use.
         </p>
-        <p className="text-sm text-secondary">
+        <p className="text-sm text-black dark:text-white">
           It has features like Row virtualization, Column sorting, filtering, ordering, pinning, etc.
         </p>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }
 

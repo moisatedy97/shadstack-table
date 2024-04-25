@@ -12,7 +12,7 @@ import {
   Table,
   TableFeature,
   Updater,
-  VisibilityState
+  VisibilityState,
 } from "@tanstack/react-table";
 
 import { dataTableNumberFilters, dataTableStringFilters } from "../defaults/data-table-models";
@@ -34,6 +34,7 @@ export interface I_DataTableSessionStates {
   columnFilters: ColumnFiltersState;
   columnFiltersFns: ColumnFiltersFnsState;
   columnSizing: ColumnSizingState;
+  columnPinning: ColumnPinningState;
   globalFilter: string | undefined;
 }
 
@@ -115,13 +116,13 @@ export const FiltersFnsFeature: TableFeature<unknown> = {
   getInitialState: (state): ColumnFiltersFnsTableState => {
     return {
       columnFiltersFns: {},
-      ...state
+      ...state,
     };
   },
   getDefaultOptions: <TData extends RowData>(table: Table<TData>): ColumnFiltersFnsOptions => {
     return {
       enableColumnFiltersFns: true,
-      onColumnFiltersFnsChange: makeStateUpdater("columnFiltersFns", table)
+      onColumnFiltersFnsChange: makeStateUpdater("columnFiltersFns", table),
     } as ColumnFiltersFnsOptions;
   },
   createTable: <TData extends RowData>(table: Table<TData>): void => {
@@ -133,5 +134,5 @@ export const FiltersFnsFeature: TableFeature<unknown> = {
       };
       return table.options.onColumnFiltersFnsChange?.(safeUpdater);
     };
-  }
+  },
 };

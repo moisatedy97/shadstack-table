@@ -2,9 +2,10 @@ import {
   ColumnDef,
   ColumnFiltersState,
   ColumnOrderState,
+  ColumnPinningState,
   ColumnSizingState,
   SortingState,
-  VisibilityState
+  VisibilityState,
 } from "@tanstack/react-table";
 
 import { ColumnFiltersFnsState } from "../interfaces/data-table-states";
@@ -26,5 +27,6 @@ export const dataTableDefaults = {
   },
   columnVisibility: (): VisibilityState => ({}),
   columnSizing: (): ColumnSizingState => ({}),
-  globalFilter: (): string => ""
+  columnPinning: (): ColumnPinningState => ({}),
+  globalFilter: (): string => "",
 };

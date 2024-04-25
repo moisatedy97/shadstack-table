@@ -1,7 +1,12 @@
 import { Column, Table } from "@tanstack/react-table";
 import { Pin, PinOff } from "lucide-react";
 
-import { ContextMenuIconItem, ContextMenuLabel, ContextMenuSeparator, ContextMenuSubContent } from "../context-menu";
+import {
+  DropdownMenuIconItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuSubContent,
+} from "../dropdown-menu";
 
 function DataTablePinning<TData>({ table }: { table: Table<TData> }) {
   const handlePin = (column: Column<TData>) => () => {
@@ -13,9 +18,9 @@ function DataTablePinning<TData>({ table }: { table: Table<TData> }) {
   };
 
   return (
-    <ContextMenuSubContent className="w-48">
-      <ContextMenuLabel>Column Pinning</ContextMenuLabel>
-      <ContextMenuSeparator />
+    <DropdownMenuSubContent className="w-48">
+      <DropdownMenuLabel>Column Pinning</DropdownMenuLabel>
+      <DropdownMenuSeparator />
       {table
         .getAllColumns()
         .filter((column) => typeof column.accessorFn !== "undefined")
@@ -31,7 +36,7 @@ function DataTablePinning<TData>({ table }: { table: Table<TData> }) {
           ) : undefined;
 
           return (
-            <ContextMenuIconItem
+            <DropdownMenuIconItem
               key={column.id}
               icon={icon}
               disabled={!column.getCanPin()}
@@ -40,16 +45,20 @@ function DataTablePinning<TData>({ table }: { table: Table<TData> }) {
               onClick={handlePin(column)}
             >
               {column.id}
-            </ContextMenuIconItem>
+            </DropdownMenuIconItem>
           );
         })}
       {Object.keys(table.getState().columnPinning).length > 0 && (
         <>
-          <ContextMenuSeparator />
-          <ContextMenuIconItem onClick={() => table.resetColumnPinning()}>Reset Pinning</ContextMenuIconItem>
+          <DropdownMenuSeparator />
+          {table.getAllColumns().some((column) => column.getIsPinned()) && (
+            <DropdownMenuIconItem icon={<PinOff />} onClick={() => table.resetColumnPinning()}>
+              Reset Pinning
+            </DropdownMenuIconItem>
+          )}
         </>
       )}
-    </ContextMenuSubContent>
+    </DropdownMenuSubContent>
   );
 }
 

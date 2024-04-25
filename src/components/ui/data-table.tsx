@@ -15,6 +15,7 @@ import {
   ColumnDef,
   ColumnFiltersState,
   ColumnOrderState,
+  ColumnPinningState,
   ColumnSizingState,
   getCoreRowModel,
   getFacetedMinMaxValues,
@@ -74,6 +75,10 @@ function DataTableComponent<TData, TValue>({ columns, data, isLoading, onRowClic
     "columnSizing",
     dataTableDefaults.columnSizing(),
   );
+  const [columnPinning, setColumnPinning] = useDataTableSessionState<ColumnPinningState>(
+    "columnPinning",
+    dataTableDefaults.columnPinning(),
+  );
   const [globalFilter, setGlobalFilter] = useDataTableSessionState<string>(
     "globalFilter",
     dataTableDefaults.globalFilter(),
@@ -94,6 +99,7 @@ function DataTableComponent<TData, TValue>({ columns, data, isLoading, onRowClic
       columnOrder: columnOrder,
       globalFilter: globalFilter,
       columnSizing: columnSizing,
+      columnPinning: columnPinning,
     },
     filterFns: {
       equalsNumber: dataTableNumberFilters.equalsNumber,
@@ -119,6 +125,7 @@ function DataTableComponent<TData, TValue>({ columns, data, isLoading, onRowClic
     onColumnOrderChange: setColumnOrder,
     onGlobalFilterChange: setGlobalFilter,
     onColumnSizingChange: setColumnSizing,
+    onColumnPinningChange: setColumnPinning,
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getFacetedMinMaxValues: getFacetedMinMaxValues(),
@@ -150,10 +157,10 @@ function DataTableComponent<TData, TValue>({ columns, data, isLoading, onRowClic
 
   const dataTableHeader = useMemo(() => {
     return <DataTableHeader table={table} />;
-  }, [columnVisibility, columnOrder, columnFiltersFns, globalFilter]);
+  }, [columnVisibility, columnOrder, columnPinning, columnFiltersFns, globalFilter]);
   const dataTableFooter = useMemo(() => {
     return <DataTableFooter table={table} />;
-  }, [table.getRowModel().rows, columnVisibility]);
+  }, [table.getRowModel().rows, columnPinning, columnVisibility]);
 
   return (
     <div className="rounded-md">

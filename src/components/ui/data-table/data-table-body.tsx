@@ -6,6 +6,7 @@ import { Virtualizer } from "@tanstack/react-virtual";
 
 import { Skeleton } from "../skeleton";
 import { TableBody, TableCell, TableRow } from "../table";
+import { cn } from "@/lib/utils";
 
 function DataTableBody<TData>({
   table,
@@ -28,7 +29,7 @@ function DataTableBody<TData>({
     return (
       <TableBody className="relative grid h-full">
         {[...Array(5)].map((_, index) => (
-          <TableRow key={index} className="flex w-full">
+          <TableRow key={index} className="flex">
             <TableCell className="flex-1">
               <Skeleton className="h-5 w-full" />
             </TableCell>
@@ -45,7 +46,7 @@ function DataTableBody<TData>({
         return (
           <TableRow
             key={row.id}
-            className="absolute flex w-full dark:text-white"
+            className="absolute flex w-full bg-white dark:bg-black dark:text-white"
             data-index={virtualRow.index}
             ref={(node) => rowVirtualizer.measureElement(node)}
             style={{ transform: `translateY(${virtualRow.start}px)` }}
@@ -79,6 +80,8 @@ const DragAlongCell = <TData, TValue>({ cell }: { cell: Cell<TData, TValue> }) =
   const isLastLeftPinnedColumn = isPinned === "left" && cell.column.getIsLastColumn("left");
   const isFirstRightPinnedColumn = isPinned === "right" && cell.column.getIsFirstColumn("right");
 
+  const classNames = cn("flex", isDragging ? "bg-primary/50" : "bg-inherit");
+
   const style: CSSProperties = {
     transform: CSS.Translate.toString(transform),
     transition: "width transform 0.2s ease-in-out",
@@ -97,7 +100,7 @@ const DragAlongCell = <TData, TValue>({ cell }: { cell: Cell<TData, TValue> }) =
   };
 
   return (
-    <TableCell style={style} ref={setNodeRef} className={`flex ${isDragging ? "bg-primary/50" : ""}`}>
+    <TableCell style={style} ref={setNodeRef} className={classNames}>
       {flexRender(cell.column.columnDef.cell, cell.getContext())}
     </TableCell>
   );
